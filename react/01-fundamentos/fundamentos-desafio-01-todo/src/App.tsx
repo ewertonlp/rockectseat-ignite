@@ -6,6 +6,11 @@ import { PlusCircle, Trash } from 'phosphor-react';
 import styles from './App.module.css';
 import './global.css';
 
+export interface TaskType {
+  descricao: string;
+  concluido: boolean;
+}
+
 function App() {
   const [newTask, setNewTask] = useState('');
 
@@ -16,8 +21,13 @@ function App() {
 
   async function handleCreateNewTask(event: FormEvent) {
     event.preventDefault();
-    const response = await api.post('/tarefas');
-    alert('ok');
+    try {
+      const response = await api.post('/tarefas', newTask);
+      alert('Tarefa criada com sucesso');
+    } catch (error) {
+      alert('Erro ao criar a nova tarefa!');
+      console.error('Erro na solicitação POST:', error);
+    }
   }
 
   const isNewTaskEmpty = newTask.length === 0;
@@ -30,7 +40,7 @@ function App() {
           <input
             type="text"
             placeholder="Adicione uma nova tarefa"
-            name="taskInput"
+            name="tarefa"
             onChange={handleCreateNewTaskChange}
             value={newTask}
           />
