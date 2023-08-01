@@ -1,0 +1,113 @@
+.task {
+  display: grid;
+  grid-template-columns: 1fr 600px 1fr;
+  align-items: flex-start;
+  justify-content: space-between;
+  padding: 1rem 1.312rem;
+  background: var(--gray-500);
+  border-radius: 8px;
+  border: 1px solid var(--gray-400);
+  margin: 0.5rem 0;
+
+  transition: border 0.1s;
+}
+
+.task:hover {
+  border: 1px solid var(--blue-dark);
+}
+
+.checkContainer {
+  display: block;
+  position: relative;
+  cursor: pointer;
+  font-size: 1.25rem;
+  margin-right: 1rem;
+}
+
+.checkContainer input[type='checkbox'] {
+  position: absolute;
+  opacity: 0;
+  cursor: pointer;
+  height: 0;
+  width: 0;
+}
+
+.checkmark {
+  position: absolute;
+  top: 0;
+  left: 0;
+  height: 24px;
+  width: 24px;
+  border: 2px solid var(--blue);
+  border-radius: 50px;
+  cursor: pointer;
+}
+
+.checkContainer input:checked ~ .checkmark {
+  background: var(--purple-dark);
+  border: none;
+}
+
+.checkContainer .checkmark:after {
+  content: '';
+  position: absolute;
+  display: none;
+  left: 9px;
+  top: 4px;
+  width: 4px;
+  height: 10px;
+  border: solid white;
+  border-width: 0 3px 3px 0;
+  -webkit-transform: rotate(45deg);
+  -ms-transform: rotate(45deg);
+  transform: rotate(45deg);
+}
+
+.checkContainer input:checked ~ .checkmark:after {
+  display: block;
+}
+
+.descricao {
+  display: flex;
+  align-items: center;
+  justify-content: flex-start;
+}
+
+.descricao > p {
+  font-size: 0.875rem;
+  color: var(--gray-100);
+}
+
+.deleteIcon {
+  display: flex;
+  justify-content: flex-end;
+  color: var(--gray-300);
+  font-size: 1.25rem;
+  border-radius: 2px;
+  cursor: pointer;
+  transition: color 0.1s;
+}
+
+.deleteIcon:hover {
+  color: var(--danger);
+}
+
+.checked p {
+  color: var(--gray-300);
+  text-decoration: line-through;
+  text-decoration-color: var(--gray-300);
+}
+
+@media screen and (max-width: 768px) {
+  .task {
+    display: grid;
+    grid-template-columns: 1fr 5fr 1fr;
+    width: 100%;
+    position: relative;
+    margin: 0 auto;
+    padding: 1rem 2rem;
+    margin-bottom: .5rem;
+  }
+
+
+}

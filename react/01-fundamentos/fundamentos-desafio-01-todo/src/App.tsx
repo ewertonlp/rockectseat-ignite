@@ -1,32 +1,105 @@
-import { ChangeEvent, FormEvent, useState } from 'react';
-import { Header } from './components/header/Header';
-import { api } from './services/api';
+import { ChangeEvent, FormEvent, useState, useEffect } from 'react';
 
-import { PlusCircle, Trash } from 'phosphor-react';
+import { api } from './services/api';
+import { Header } from './components/header/Header';
+import { TaskCard } from './components/taskCard/TaskCard';
+
+import taskIcon from './assets/task-icon.svg';
+import { PlusCircle } from 'phosphor-react';
+import { ToastContainer, toast } from 'react-toastify';
+import 'react-toastify/dist/ReactToastify.css';
 import styles from './App.module.css';
 import './global.css';
 
 export interface TaskType {
+  _id: string;
   descricao: string;
-  concluido: boolean;
+  isComplete: boolean;
 }
 
 function App() {
   const [newTask, setNewTask] = useState('');
+  const [getTasks, setGetTasks] = useState<TaskType[]>([]);
+  const [completedTaskCount, setCompletedTaskCount] = useState(0);
 
   function handleCreateNewTaskChange(event: ChangeEvent<HTMLInputElement>) {
     setNewTask(event.target.value);
-    console.log(newTask);
   }
 
   async function handleCreateNewTask(event: FormEvent) {
     event.preventDefault();
     try {
-      const response = await api.post('/tarefas', newTask);
-      alert('Tarefa criada com sucesso');
+      const novaTarefa = { descricao: newTask, isComplete: false };
+      await api.post('/tarefas', novaTarefa);
+      setNewTask('');
+      getAllTasks();
     } catch (error) {
-      alert('Erro ao criar a nova tarefa!');
-      console.error('Erro na solicitação POST:', error);
+      toast.error('Erro ao criar nova tarefa. Tente novamente.');
+    }
+  }
+
+  async function getAllTasks() {
+    try {
+      const response = await api.get('/tarefas');
+      setGetTasks(response.data);
+    } catch (error) {
+      toast.error('Erro ao buscar as tarefas.');
+    }
+  }
+
+  useEffect(() => {
+    getAllTasks();
+  }, []);
+
+  async function deleteTask(id: string) {
+    try {
+      await api.delete(`/tarefas/${id}`);
+      getAllTasks();
+      toast.success('Tarefa excluída com sucesso!');
+    } catch (error) {
+      toast.error('Erro ao deletar tarefa.');
+    }
+  }
+
+  async function handleTaskComplete(id: string) {
+    try {
+      const taskToUpdate = getTasks.find((task) => task._id === id);
+      if (!taskToUpdate) {
+        return;
+      }
+
+      const updateTask = {
+        ...taskToUpdate,
+        isComplete: !taskToUpdate.isComplete,
+      };
+
+      await api.put(`/tarefas/${id}`, updateTask);
+
+      setGetTasks((prevTasks) =>
+        prevTasks.map((task) =>
+          task._id === id
+            ? { ...task, isComplete: updateTask.isComplete }
+            : task
+        )
+      );
+    } catch (error) {
+      toast.error('Erro ao marcar a tarefa como completa.');
+    }
+  }
+
+  useEffect(() => {
+    getCompletedTaskCount();
+  }, [getTasks]);
+
+  async function getCompletedTaskCount() {
+    try {
+      const response = await api.get('/tarefas');
+      const completedTasks = response.data.filter(
+        (task: { isComplete: boolean }) => task.isComplete === true
+      );
+      setCompletedTaskCount(completedTasks.length);
+    } catch (error) {
+      toast.error('Erro ao buscar as tarefas completadas.');
     }
   }
 
@@ -43,6 +116,7 @@ function App() {
             name="tarefa"
             onChange={handleCreateNewTaskChange}
             value={newTask}
+            required
           />
           <button type="submit" disabled={isNewTaskEmpty}>
             Criar
@@ -52,30 +126,38 @@ function App() {
         <div className={styles.headerTasks}>
           <div className={styles.taskList}>
             <p>Tarefas criadas</p>
-            <p className={styles.taskListNumber}>5</p>
+            <p className={styles.taskListNumber}>{getTasks.length}</p>
           </div>
           <div className={styles.taskConclude}>
             <p>Concluídas</p>
-            <p className={styles.taskConcludeNumber}>2 de 5</p>
+            <p className={styles.taskConcludeNumber}>
+              {completedTaskCount} de {getTasks.length}
+            </p>
           </div>
         </div>
-        <div className={styles.task}>
-          <div className={styles.checkContainer}>
-            <input
-              type="checkbox"
-              title="Clique para marcar tarefa como concluída"
-            />
-            <span className={styles.checkmark}></span>
+        {getTasks.length === 0 ? (
+          <div>
+            <div className={styles.noTaskInfo}>
+              <img src={taskIcon} alt="Icone de Tarefa" />
+              <strong>Você ainda não tem tarefas cadastradas</strong>
+              <p>Crie tarefas e organize seus itens a fazer</p>
+            </div>
           </div>
-          <p>
-            Lorem ipsum dolor sit amet consectetur adipisicing elit. Tempora
-            fuga impedit Tempora fuga impedit
-          </p>
-          <p>
-            <Trash />
-          </p>
-        </div>
+        ) : (
+          <div>
+            {getTasks.map((task) => (
+              <TaskCard
+                key={task._id}
+                id={task._id}
+                descricao={task.descricao}
+                onDeleteTask={() => deleteTask(task._id)}
+                onHandleTaskComplete={() => handleTaskComplete(task._id)}
+              />
+            ))}
+          </div>
+        )}
       </div>
+      <ToastContainer autoClose={2500} theme="colored" />
     </div>
   );
 }
