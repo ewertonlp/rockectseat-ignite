@@ -1,0 +1,44 @@
+{
+  "transactions": [
+    {
+      "id": 1,
+      "description": "Desenvolvimento de site",
+      "type": "income",
+      "category": "Venda",
+      "price": 14000,
+      "createdAt": "2023-08-12"
+    },
+    {
+      "id": 2,
+      "description": "Hamburguer",
+      "type": "outcome",
+      "category": "Alimentação",
+      "price": 50,
+      "createdAt": "2023-08-11"
+    },
+    {
+      "id": 3,
+      "description": "Aluguel do apartamento",
+      "type": "outcome",
+      "category": "Moradia",
+      "price": 1200,
+      "createdAt": "2023-08-10"
+    },
+    {
+      "description": "Salário",
+      "category": "Salário",
+      "price": 5400,
+      "type": "income",
+      "createdAt": "2023-08-14T22:34:58.952Z",
+      "id": 4
+    },
+    {
+      "description": "Almoço",
+      "category": "Alimentação",
+      "price": 35,
+      "type": "outcome",
+      "createdAt": "2023-08-14T22:47:52.187Z",
+      "id": 5
+    }
+  ]
+}
