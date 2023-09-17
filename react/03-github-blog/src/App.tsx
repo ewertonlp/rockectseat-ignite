@@ -10,7 +10,7 @@ export function App() {
     <ThemeProvider theme={defaultTheme}>
       <Routes>
         <Route path="/" element={<Homepage />} />
-        <Route path="/post" element={<Post />} />
+        <Route path="/post/:number" element={<Post />} />
       </Routes>
 
       <GlobalStyle />

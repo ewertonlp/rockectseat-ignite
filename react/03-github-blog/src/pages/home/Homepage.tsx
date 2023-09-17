@@ -1,11 +1,19 @@
 import { useState, useEffect } from 'react'
 import axios from 'axios'
-import {Link} from 'react-router-dom'
+import { useNavigate } from 'react-router-dom'
 
 import logo from '../../assets/terminal-solid.svg'
 
 import UserContainer from './components/userContainer/UserContainer'
-import { HomeCover, PostCard, PostCardContainer, SearchPost } from './Styles'
+import {
+  CustomLink,
+  HomeCover,
+  PostCard,
+  PostCardContainer,
+  SearchPost,
+} from './Styles'
+import { api } from '../../services/api'
+import { TruncateText } from '../../utils/TruncatedText'
 
 interface HomePage {
   avatar_url?: string
@@ -17,11 +25,24 @@ interface HomePage {
   followers?: string
 }
 
+interface PostCard {
+  id: number
+  title: string
+  updated_at: string
+  body: string
+  number:number
+}
+
 export default function Homepage() {
   const [userData, setUserData] = useState<HomePage>([])
+  const [postData, setPostData] = useState<PostCard[]>([])
   const username = 'ewertonlp'
+  const owner = 'ewertonlp'
+  const repo = 'rockectseat-ignite'
+  const navigate = useNavigate()
+
   const token =
-    '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'
+    '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'
 
   const userAuth = axios.create({
     headers: {
@@ -34,16 +55,41 @@ export default function Homepage() {
       const response = await userAuth.get(
         `https://api.github.com/users/${username}`
       )
-      console.log(response.data)
       setUserData(response.data)
     } catch (error) {
       console.error('Erro ao buscar os dados do usuário:', error)
     }
   }
 
+  const fetchAllPostsData = async () => {
+    try {
+      const response = await api.get(
+        `/repos/${owner}/${repo}/issues`
+      )
+      setPostData(response.data)
+    } catch (error) {
+      console.error('Erro ao buscar issues:', error)
+    }
+  }
+
   useEffect(() => {
     fetchUserData()
+    fetchAllPostsData()
   }, [])
+
+  function calculateDaysAgo(updated_at: string) {
+    const updatedDate = new Date(updated_at)
+    const currentDate = new Date()
+
+    const timeDifference = currentDate - updatedDate
+    const daysAgo = Math.floor(timeDifference / (1000 * 3600 * 24))
+
+    return daysAgo
+  }
+
+  function handlePostClick(number: number) {
+    navigate(`/post/${number}`)
+  }
 
   return (
     <div>
@@ -69,50 +115,34 @@ export default function Homepage() {
       <SearchPost>
         <div>
           <h3>Publicações</h3>
-          <span>6 publicações</span>
+          {postData.length < 2 ? (
+            <span>{postData.length} publicação</span>
+          ) : (
+            <span>{postData.length} publicações</span>
+          )}
         </div>
         <input type="text" placeholder="Buscar conteúdo" width="100%" />
       </SearchPost>
 
       <PostCardContainer>
-        <Link to='/post'>
-        <PostCard>
-          <div>
-            <h2>Post Title</h2>
-            <span>Há 1 dia</span>
-          </div>
+        {postData ? (
+          postData.map((post) => {
+            return (
+              <PostCard key={post.id} onClick={() => handlePostClick(post.number)}>
+                <div>
+                  <strong>{post.title}</strong>
+                  <span>Há {calculateDaysAgo(post.updated_at)} dias</span>
+                </div>
 
-          <p>
-            Mussum Ipsum, cacilds vidis litro abertis. Interagi no mé, cursus
-            quis, vehicula ac nisi. Manduma pindureta quium dia nois paga.
-            Interessantiss quisso pudia.
-          </p>
-        </PostCard>
-        </Link>
-        <PostCard>
-          <div>
-            <h2>Post Title</h2>
-            <span>Há 1 dia</span>
-          </div>
-
-          <p>
-            Mussum Ipsum, cacilds vidis litro abertis. Interagi no mé, cursus
-            quis, vehicula ac nisi. Manduma pindureta quium dia nois paga.
-            Interessantiss quisso pudia.
-          </p>
-        </PostCard>
-        <PostCard>
-          <div>
-            <h2>Post Title</h2>
-            <span>Há 1 dia</span>
-          </div>
-
-          <p>
-            Mussum Ipsum, cacilds vidis litro abertis. Interagi no mé, cursus
-            quis, vehicula ac nisi. Manduma pindureta quium dia nois paga.
-            Interessantiss quisso pudia.
-          </p>
-        </PostCard>
+                <p>
+                  <TruncateText text={post.body} maxLength={200} />
+                </p>
+              </PostCard>
+            )
+          })
+        ) : (
+          <h3>Carregando Posts...</h3>
+        )}
       </PostCardContainer>
     </div>
   )

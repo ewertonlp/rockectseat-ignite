@@ -1,5 +1,6 @@
 import styled from 'styled-components'
 import cover from '../../assets/cover.png'
+import { Link } from 'react-router-dom'
 
 export const HomeCover = styled.div`
   background-image: url(${cover});
@@ -21,7 +22,7 @@ export const HomeCover = styled.div`
     color: ${(props) => props.theme['blue']};
     font-size: 1.5rem;
     line-height: 1.6;
-    margin : 1.2rem 0 2.875rem;
+    margin: 1.2rem 0 2.875rem;
   }
 `
 
@@ -80,17 +81,41 @@ export const PostCard = styled.div`
   background-color: ${(props) => props.theme['base-post']};
   border-radius: 10px;
   padding: 2rem;
+  border: 2px solid ${(props) => props.theme['base-border']};
+  cursor: pointer;
+  transition: all 0.15s ease-out;
+
+  &:hover {
+    border: 2px solid ${(props) => props.theme['blue']};
+  }
 
   div {
     display: grid;
-    grid-template-columns: 17.69rem 1fr;
+    grid-template-columns: 283px 1fr;
     margin-bottom: 1.2rem;
-    gap: 1rem;
+
+    strong {
+      font-size: 1.25rem;
+      line-height: 1.4 6;
+    }
 
     span {
       line-height: 1.6;
       font-size: 0.875rem;
       color: ${(props) => props.theme['base-span']};
     }
+  }
+
+  p {
+    max-lines: 4;
+  }
+`
+
+export const CustomLink = styled(Link)`
+  text-decoration: none;
+  color: ${(props) => props.theme['base-text']};
+
+  strong {
+    color: ${(props) => props.theme['base-title']};
   }
 `
