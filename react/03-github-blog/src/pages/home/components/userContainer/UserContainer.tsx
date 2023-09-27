@@ -32,8 +32,15 @@ export default function UserContainer({
       <UserInfo>
         <UserInfoTitle>
           <strong>{name}</strong>
-          <a href={html_url}>
-            GITHUB <FontAwesomeIcon icon={faArrowUpRightFromSquare} />
+
+          <a href={html_url} target="_blank">
+            GITHUB{' '}
+            <span>
+              <FontAwesomeIcon
+                icon={faArrowUpRightFromSquare}
+                className="icon-link"
+              />
+            </span>
           </a>
         </UserInfoTitle>
         <p>{bio}</p>

@@ -30,6 +30,7 @@ export const PostHeaderInfoContainer = styled.div`
 
       &:hover {
         text-decoration: underline;
+        text-underline-offset: 6px;
       }
     }
   }

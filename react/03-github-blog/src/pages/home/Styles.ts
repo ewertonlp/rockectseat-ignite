@@ -16,6 +16,7 @@ export const HomeCover = styled.div`
   align-items: center;
   justify-content: center;
   flex-direction: column;
+  cursor: pointer;
 
   span {
     font-family: 'Coda', cursive;
@@ -67,14 +68,40 @@ export const SearchPost = styled.div`
       color: ${(props) => props.theme['base-label']};
     }
   }
+
+  @media (min-width: 376px) {
+    padding: 0 0.5rem;
+  }
+
+  @media (min-width: 1024px) {
+    padding: 0;
+  }
 `
 
 export const PostCardContainer = styled.div`
   display: grid;
   grid-template-columns: repeat(2, 1fr);
   gap: 2rem;
-  width: 54rem;
+
   margin: 0 auto 14.69rem;
+
+  @media (min-width: 375px) {
+    display: flex;
+    flex-direction: column;
+    width: 100%;
+  }
+
+  @media (min-width: 768px) {
+    display: grid;
+    gap: 1rem;
+    padding: 0 1rem;
+  }
+
+  @media (min-width: 1024px) {
+    display: grid;
+    gap: 2rem;
+    width: 56rem;
+  }
 `
 
 export const PostCard = styled.div`
@@ -108,6 +135,36 @@ export const PostCard = styled.div`
 
   p {
     max-lines: 4;
+  }
+
+  @media (min-width: 375px) {
+    height: 250px;
+    margin: 0 0.5rem;
+
+    div {
+      display: flex;
+      justify-content: space-between;
+
+      strong {
+        margin-right: 3rem;
+      }
+    }
+  }
+  @media (min-width: 768px) {
+    height: 300px;
+
+    div {
+      display: flex;
+      justify-content: space-between;
+
+      strong {
+        margin-right: 3rem;
+      }
+
+      span {
+        width: 6rem;
+      }
+    }
   }
 `
 

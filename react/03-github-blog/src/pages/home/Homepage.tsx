@@ -1,21 +1,16 @@
 import { useState, useEffect } from 'react'
-import axios from 'axios'
-import { useNavigate } from 'react-router-dom'
+import { Link, useNavigate } from 'react-router-dom'
+import { debounce } from 'lodash'
 
 import logo from '../../assets/terminal-solid.svg'
 
 import UserContainer from './components/userContainer/UserContainer'
-import {
-  CustomLink,
-  HomeCover,
-  PostCard,
-  PostCardContainer,
-  SearchPost,
-} from './Styles'
+import { HomeCover, PostCard, PostCardContainer, SearchPost } from './Styles'
 import { api } from '../../services/api'
 import { TruncateText } from '../../utils/TruncatedText'
+import { SearchForm } from './components/searchForm'
 
-interface HomePage {
+interface UserDataType {
   avatar_url?: string
   name?: string
   html_url?: string
@@ -30,31 +25,22 @@ interface PostCard {
   title: string
   updated_at: string
   body: string
-  number:number
+  number: number
 }
 
 export default function Homepage() {
-  const [userData, setUserData] = useState<HomePage>([])
+  const [userData, setUserData] = useState<UserDataType[]>([])
   const [postData, setPostData] = useState<PostCard[]>([])
+  const [inputData, setInputData] = useState('')
+  const [filteredIssues, setFilteredIssues] = useState<PostCard[]>([])
   const username = 'ewertonlp'
   const owner = 'ewertonlp'
   const repo = 'rockectseat-ignite'
   const navigate = useNavigate()
 
-  const token =
-    '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'
-
-  const userAuth = axios.create({
-    headers: {
-      Authorization: `token ${token}`,
-    },
-  })
-
   const fetchUserData = async () => {
     try {
-      const response = await userAuth.get(
-        `https://api.github.com/users/${username}`
-      )
+      const response = await api.get(`https://api.github.com/users/${username}`)
       setUserData(response.data)
     } catch (error) {
       console.error('Erro ao buscar os dados do usuário:', error)
@@ -63,9 +49,7 @@ export default function Homepage() {
 
   const fetchAllPostsData = async () => {
     try {
-      const response = await api.get(
-        `/repos/${owner}/${repo}/issues`
-      )
+      const response = await api.get(`/repos/${owner}/${repo}/issues`)
       setPostData(response.data)
     } catch (error) {
       console.error('Erro ao buscar issues:', error)
@@ -76,6 +60,19 @@ export default function Homepage() {
     fetchUserData()
     fetchAllPostsData()
   }, [])
+
+  const fetchSearchData = async () => {
+    try {
+      const response = await api.get(
+        `/search/issues?q=is:issue+${inputData}%20repo:${username}/${repo}`
+      )
+      const issues = response.data.items || []
+      setFilteredIssues(issues)
+      console.log(response.data)
+    } catch (error) {
+      console.error(error)
+    }
+  }
 
   function calculateDaysAgo(updated_at: string) {
     const updatedDate = new Date(updated_at)
@@ -91,11 +88,23 @@ export default function Homepage() {
     navigate(`/post/${number}`)
   }
 
+  const debouncedFetchSearchData = debounce(fetchSearchData, 500)
+
+  useEffect(() => {
+    if (inputData) {
+      debouncedFetchSearchData()
+    }
+  }, [debouncedFetchSearchData, inputData])
+
+  console.log(filteredIssues)
+
   return (
     <div>
       <HomeCover>
         <img src={logo} alt="" />
-        <span>GITHUB BLOG</span>
+        <Link to="/">
+          <span>GITHUB BLOG</span>
+        </Link>
       </HomeCover>
 
       {userData ? (
@@ -113,7 +122,7 @@ export default function Homepage() {
       )}
 
       <SearchPost>
-        <div>
+        <div className="search-title">
           <h3>Publicações</h3>
           {postData.length < 2 ? (
             <span>{postData.length} publicação</span>
@@ -121,28 +130,49 @@ export default function Homepage() {
             <span>{postData.length} publicações</span>
           )}
         </div>
-        <input type="text" placeholder="Buscar conteúdo" width="100%" />
+        <SearchForm
+          setInputData={setInputData}
+          inputData={inputData}
+          fetchSearchData={fetchSearchData}
+        />
       </SearchPost>
 
       <PostCardContainer>
-        {postData ? (
-          postData.map((post) => {
-            return (
-              <PostCard key={post.id} onClick={() => handlePostClick(post.number)}>
-                <div>
-                  <strong>{post.title}</strong>
-                  <span>Há {calculateDaysAgo(post.updated_at)} dias</span>
-                </div>
+        {filteredIssues.length
+          ? filteredIssues.map((post) => {
+              return (
+                <PostCard
+                  key={post.id}
+                  onClick={() => handlePostClick(post.number)}
+                >
+                  <div>
+                    <strong>{post.title}</strong>
+                    <span>Há {calculateDaysAgo(post.updated_at)} dias</span>
+                  </div>
 
-                <p>
-                  <TruncateText text={post.body} maxLength={200} />
-                </p>
-              </PostCard>
-            )
-          })
-        ) : (
-          <h3>Carregando Posts...</h3>
-        )}
+                  <p>
+                    <TruncateText text={post.body} maxLength={200} />
+                  </p>
+                </PostCard>
+              )
+            })
+          : postData.map((post) => {
+              return (
+                <PostCard
+                  key={post.id}
+                  onClick={() => handlePostClick(post.number)}
+                >
+                  <div>
+                    <strong>{post.title}</strong>
+                    <span>Há {calculateDaysAgo(post.updated_at)} dias</span>
+                  </div>
+
+                  <p>
+                    <TruncateText text={post.body} maxLength={200} />
+                  </p>
+                </PostCard>
+              )
+            })}
       </PostCardContainer>
     </div>
   )
